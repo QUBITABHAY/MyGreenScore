@@ -1,0 +1,232 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { TrendingUp, Activity, Target as TargetIcon, Car } from 'lucide-react';
+import { api } from '@/lib/api';
+import { formatCO2e, formatNumber } from '@/lib/utils';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import toast from 'react-hot-toast';
+
+const COLORS = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+
+export default function DashboardPage() {
+    const [userId] = useState('demo-user');
+    const [stats, setStats] = useState<any>(null);
+    const [trends, setTrends] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadDashboardData();
+    }, []);
+
+    const loadDashboardData = async () => {
+        try {
+            const [statsData, trendsData] = await Promise.all([
+                api.getDashboardStats(userId),
+                api.getTrends(userId, 30),
+            ]);
+            setStats(statsData);
+            setTrends(trendsData);
+        } catch (error) {
+            toast.error('Failed to load dashboard data');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-300">Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    const categoryData = stats?.by_category
+        ? Object.entries(stats.by_category).map(([name, value]) => ({
+            name,
+            value: value as number,
+        }))
+        : [];
+
+    const trendsChartData = trends?.trends || [];
+
+    return (
+        <div className="min-h-screen pt-24 bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-12">
+                    <h1 className="text-4xl font-bold mb-4">
+                        Your{' '}
+                        <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                            Carbon Dashboard
+                        </span>
+                    </h1>
+                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                        Track your environmental impact and progress over time
+                    </p>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                    {/* Total CO2e */}
+                    <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white shadow-xl">
+                        <div className="flex items-start justify-between mb-4">
+                            <div>
+                                <div className="text-sm font-medium opacity-90 mb-1">Total Emissions</div>
+                                <div className="text-3xl font-bold">{formatCO2e(stats?.total_co2e_kg || 0)}</div>
+                            </div>
+                            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <Activity className="w-6 h-6" />
+                            </div>
+                        </div>
+                        <div className="text-sm opacity-90">All-time carbon footprint</div>
+                    </div>
+
+                    {/* Equivalent KM */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
+                        <div className="flex items-start justify-between mb-4">
+                            <div>
+                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                    Equivalent Distance
+                                </div>
+                                <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                                    {formatNumber(stats?.equivalent_km_driven || 0)} km
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
+                                <Car className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">If driven by average car</div>
+                    </div>
+
+                    {/* Categories */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
+                        <div className="flex items-start justify-between mb-4">
+                            <div>
+                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                    Categories
+                                </div>
+                                <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                                    {categoryData.length}
+                                </div>
+                            </div>
+                            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
+                                <TargetIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Tracked activities</div>
+                    </div>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Category Breakdown */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
+                        <h2 className="text-xl font-bold mb-6">Emissions by Category</h2>
+                        {categoryData.length > 0 ? (
+                            <div className="space-y-4">
+                                <ResponsiveContainer width="100%" height={250}>
+                                    <PieChart>
+                                        <Pie
+                                            data={categoryData}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
+                                            outerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                        >
+                                            {categoryData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip formatter={(value: any) => formatCO2e(value)} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+
+                                <div className="space-y-2">
+                                    {categoryData.map((item, index) => (
+                                        <div key={item.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-3 h-3 rounded-full"
+                                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                                ></div>
+                                                <span className="font-medium">{item.name}</span>
+                                            </div>
+                                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                                                {formatCO2e(item.value)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-gray-500">
+                                No data yet. Start by assessing your footprint!
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Trends Chart */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
+                        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-emerald-600" />
+                            30-Day Trends
+                        </h2>
+                        {trendsChartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={trendsChartData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={{ fontSize: 12 }}
+                                        tickFormatter={(value) => {
+                                            const date = new Date(value);
+                                            return `${date.getMonth() + 1}/${date.getDate()}`;
+                                        }}
+                                    />
+                                    <YAxis tick={{ fontSize: 12 }} />
+                                    <Tooltip
+                                        formatter={(value: any) => [formatCO2e(value), 'CO2e']}
+                                        labelFormatter={(label) => `Date: ${label}`}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="co2e_kg"
+                                        stroke="#10b981"
+                                        strokeWidth={3}
+                                        dot={{ fill: '#10b981', r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="text-center py-12 text-gray-500">
+                                No trend data available yet
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="mt-8 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl p-8 text-white text-center">
+                    <h3 className="text-2xl font-bold mb-2">Ready to reduce your impact?</h3>
+                    <p className="mb-6 text-emerald-50">Set goals and track your progress toward sustainability</p>
+                    <a
+                        href="/goals"
+                        className="inline-flex items-center gap-2 px-8 py-3 text-emerald-600 rounded-full font-semibold hover:shadow-2xl hover:-translate-y-1 transition-all"
+                    >
+                        Set Your Goals
+                        <TargetIcon className="w-5 h-5" />
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+}
