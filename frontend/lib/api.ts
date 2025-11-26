@@ -21,32 +21,43 @@ const apiClient = axios.create({
 
 export const api = {
     // Assess endpoints
-    assessFootprint: async (userId: string, items: AssessRequest['items']): Promise<AssessResponse> => {
-        const response = await apiClient.post('/api/assess', { user_id: userId, items });
+    assessFootprint: async (token: string, items: AssessRequest['items']): Promise<AssessResponse> => {
+        const response = await apiClient.post('/api/assess',
+            { items },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
         return response.data;
     },
 
     // Dashboard endpoints
-    getDashboardStats: async (userId: string): Promise<DashboardStats> => {
-        const response = await apiClient.get('/api/dashboard/stats', { params: { user_id: userId } });
+    getDashboardStats: async (token: string): Promise<DashboardStats> => {
+        const response = await apiClient.get('/api/dashboard/stats', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         return response.data;
     },
 
-    getTrends: async (userId: string, days: number = 30): Promise<TrendsResponse> => {
+    getTrends: async (token: string, days: number = 30): Promise<TrendsResponse> => {
         const response = await apiClient.get('/api/dashboard/trends', {
-            params: { user_id: userId, days },
+            params: { days },
+            headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
     },
 
     // Goals endpoints
-    setGoal: async (data: GoalCreateRequest): Promise<UserGoal> => {
-        const response = await apiClient.post('/api/goals/', data);
+    setGoal: async (token: string, data: Omit<GoalCreateRequest, 'user_id'>): Promise<UserGoal> => {
+        const response = await apiClient.post('/api/goals/',
+            data,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
         return response.data;
     },
 
-    getActiveGoal: async (userId: string): Promise<UserGoal | null> => {
-        const response = await apiClient.get('/api/goals/', { params: { user_id: userId } });
+    getActiveGoal: async (token: string): Promise<UserGoal | null> => {
+        const response = await apiClient.get('/api/goals/', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         if (response.data.message) {
             return null; // No active goal
         }
@@ -54,13 +65,25 @@ export const api = {
     },
 
     // Privacy endpoints
-    exportData: async (userId: string): Promise<ExportData> => {
-        const response = await apiClient.get('/api/privacy/export', { params: { user_id: userId } });
+    exportData: async (token: string): Promise<ExportData> => {
+        const response = await apiClient.get('/api/privacy/export', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         return response.data;
     },
 
-    deleteData: async (userId: string): Promise<{ status: string; message: string }> => {
-        const response = await apiClient.delete('/api/privacy/data', { params: { user_id: userId } });
+    deleteData: async (token: string): Promise<{ status: string; message: string }> => {
+        const response = await apiClient.delete('/api/privacy/data', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    },
+
+    // Quotes
+    getDailyQuote: async (token: string): Promise<{ quote: string; author: string; tip: string }> => {
+        const response = await apiClient.get('/api/quotes/daily', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         return response.data;
     },
 };

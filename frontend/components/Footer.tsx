@@ -11,21 +11,21 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="space-y-4">
                         <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                                 <Leaf className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                            <span className="text-lg font-bold bg-linear-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                                 MyGreenScore
                             </span>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-slate-700 dark:text-slate-300">
                             Track, reduce, and offset your environmental footprint with AI-powered insights.
                         </p>
                     </div>
 
                     {/* Quick Links */}
-                    <div className='text-gray-600 dark:text-gray-400'>
-                        <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Quick Links</h3>
+                    <div className='text-slate-700 dark:text-slate-300'>
+                        <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Quick Links</h3>
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <Link
@@ -56,8 +56,8 @@ export default function Footer() {
 
                     {/* Resources */}
                     <div>
-                        <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Resources</h3>
-                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Resources</h3>
+                        <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
                             <li>
                                 <a
                                     href="#"
@@ -87,7 +87,7 @@ export default function Footer() {
 
                     {/* Social */}
                     <div>
-                        <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Connect</h3>
+                        <h3 className="font-semibold mb-4 text-slate-900 dark:text-white">Connect</h3>
                         <div className="flex space-x-4">
                             <a
                                 href="#"
@@ -114,7 +114,7 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700 text-center text-sm text-gray-600 dark:text-gray-400">
+                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700 text-center text-sm text-slate-700 dark:text-slate-300">
                     <p>© {currentYear} MyGreenScore. Built for a sustainable future. 🌍</p>
                 </div>
             </div>

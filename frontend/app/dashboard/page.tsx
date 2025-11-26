@@ -6,24 +6,31 @@ import { api } from '@/lib/api';
 import { formatCO2e, formatNumber } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import toast from 'react-hot-toast';
+import { useAuth } from '@clerk/nextjs';
+import SustainabilityTips from '@/components/SustainabilityTips';
 
 const COLORS = ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
 
 export default function DashboardPage() {
-    const [userId] = useState('demo-user');
+    const { getToken, isLoaded, isSignedIn } = useAuth();
     const [stats, setStats] = useState<any>(null);
     const [trends, setTrends] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadDashboardData();
-    }, []);
+        if (isLoaded && isSignedIn) {
+            loadDashboardData();
+        }
+    }, [isLoaded, isSignedIn]);
 
     const loadDashboardData = async () => {
         try {
+            const token = await getToken();
+            if (!token) return;
+
             const [statsData, trendsData] = await Promise.all([
-                api.getDashboardStats(userId),
-                api.getTrends(userId, 30),
+                api.getDashboardStats(token),
+                api.getTrends(token, 30),
             ]);
             setStats(statsData);
             setTrends(trendsData);
@@ -37,10 +44,10 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-300">Loading dashboard...</p>
+                    <p className="text-slate-700 dark:text-slate-200">Loading dashboard...</p>
                 </div>
             </div>
         );
@@ -56,16 +63,16 @@ export default function DashboardPage() {
     const trendsChartData = trends?.trends || [];
 
     return (
-        <div className="min-h-screen pt-24 bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
+        <div className="min-h-screen pt-24 bg-linear-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-12">
                     <h1 className="text-4xl font-bold mb-4">
                         Your{' '}
-                        <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        <span className="bg-linear-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                             Carbon Dashboard
                         </span>
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                    <p className="text-lg text-slate-700 dark:text-slate-200">
                         Track your environmental impact and progress over time
                     </p>
                 </div>
@@ -73,7 +80,7 @@ export default function DashboardPage() {
                 {/* Stats Cards */}
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                     {/* Total CO2e */}
-                    <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white shadow-xl">
+                    <div className="bg-linear-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white shadow-xl">
                         <div className="flex items-start justify-between mb-4">
                             <div>
                                 <div className="text-sm font-medium opacity-90 mb-1">Total Emissions</div>
@@ -90,10 +97,10 @@ export default function DashboardPage() {
                     <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
                         <div className="flex items-start justify-between mb-4">
                             <div>
-                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                     Equivalent Distance
                                 </div>
-                                <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                                <div className="text-3xl font-bold text-slate-900 dark:text-white">
                                     {formatNumber(stats?.equivalent_km_driven || 0)} km
                                 </div>
                             </div>
@@ -101,17 +108,17 @@ export default function DashboardPage() {
                                 <Car className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                             </div>
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">If driven by average car</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-300">If driven by average car</div>
                     </div>
 
                     {/* Categories */}
                     <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-slate-700">
                         <div className="flex items-start justify-between mb-4">
                             <div>
-                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                     Categories
                                 </div>
-                                <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                                <div className="text-3xl font-bold text-slate-900 dark:text-white">
                                     {categoryData.length}
                                 </div>
                             </div>
@@ -119,7 +126,7 @@ export default function DashboardPage() {
                                 <TargetIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                             </div>
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Tracked activities</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-300">Tracked activities</div>
                     </div>
                 </div>
 
@@ -167,7 +174,7 @@ export default function DashboardPage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center py-12 text-gray-500">
+                            <div className="text-center py-12 text-slate-600 dark:text-slate-300">
                                 No data yet. Start by assessing your footprint!
                             </div>
                         )}
@@ -207,7 +214,7 @@ export default function DashboardPage() {
                                 </LineChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="text-center py-12 text-gray-500">
+                            <div className="text-center py-12 text-slate-600 dark:text-slate-300">
                                 No trend data available yet
                             </div>
                         )}
@@ -215,17 +222,19 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="mt-8 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl p-8 text-white text-center">
+                <div className="mt-8 bg-linear-to-r from-emerald-600 to-green-600 rounded-2xl p-8 text-white text-center">
                     <h3 className="text-2xl font-bold mb-2">Ready to reduce your impact?</h3>
                     <p className="mb-6 text-emerald-50">Set goals and track your progress toward sustainability</p>
                     <a
                         href="/goals"
-                        className="inline-flex items-center gap-2 px-8 py-3 text-emerald-600 rounded-full font-semibold hover:shadow-2xl hover:-translate-y-1 transition-all"
+                        className="inline-flex items-center gap-2 px-8 py-3 text-emerald-600 rounded-full font-semibold hover:shadow-2xl hover:-translate-y-1 transition-all bg-white"
                     >
                         Set Your Goals
                         <TargetIcon className="w-5 h-5" />
                     </a>
                 </div>
+
+                <SustainabilityTips />
             </div>
         </div>
     );

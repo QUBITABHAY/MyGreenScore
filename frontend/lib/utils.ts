@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCO2e(value: number): string {
+    if (value === undefined || value === null || isNaN(value)) {
+        return '0 kg';
+    }
     if (value < 1) {
         return `${(value * 1000).toFixed(0)} g`;
     } else if (value < 1000) {

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X, Leaf } from 'lucide-react';
+import { SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,13 +22,13 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link href="/" className="flex items-center">
-                        <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        <span className="text-xl font-bold bg-linear-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                             MyGreenScore
                         </span>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden text-gray-700 dark:text-gray-200 md:flex items-center space-x-8">
+                    <div className="hidden text-slate-800 dark:text-slate-100 md:flex items-center space-x-8">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
@@ -37,6 +38,23 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
+                        <div className="flex items-center gap-4">
+                            <SignedOut>
+                                <SignInButton mode="modal">
+                                    <button className="text-sm font-medium hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                                        Sign In
+                                    </button>
+                                </SignInButton>
+                                <SignUpButton mode="modal">
+                                    <button className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors">
+                                        Sign Up
+                                    </button>
+                                </SignUpButton>
+                            </SignedOut>
+                            <SignedIn>
+                                <UserButton afterSignOutUrl="/" />
+                            </SignedIn>
+                        </div>
                     </div>
 
                     {/* Mobile menu button */}
@@ -64,6 +82,27 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
+                        <div className="px-4 py-2 border-t border-gray-200 dark:border-slate-700 mt-2 pt-4">
+                            <SignedOut>
+                                <div className="flex flex-col gap-2">
+                                    <SignInButton mode="modal">
+                                        <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                                            Sign In
+                                        </button>
+                                    </SignInButton>
+                                    <SignUpButton mode="modal">
+                                        <button className="w-full text-left px-4 py-2 text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors">
+                                            Sign Up
+                                        </button>
+                                    </SignUpButton>
+                                </div>
+                            </SignedOut>
+                            <SignedIn>
+                                <div className="px-4 py-2">
+                                    <UserButton afterSignOutUrl="/" showName />
+                                </div>
+                            </SignedIn>
+                        </div>
                     </div>
                 </div>
             )}

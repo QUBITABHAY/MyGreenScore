@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { Download, Trash2, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '@clerk/nextjs';
 
 export default function PrivacyPage() {
-    const [userId] = useState('demo-user');
+    const { getToken } = useAuth();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [exporting, setExporting] = useState(false);
@@ -14,7 +15,12 @@ export default function PrivacyPage() {
     const handleExport = async () => {
         setExporting(true);
         try {
-            const data = await api.exportData(userId);
+            const token = await getToken();
+            if (!token) {
+                toast.error('Please sign in');
+                return;
+            }
+            const data = await api.exportData(token);
 
             // Create downloadable JSON file
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -39,7 +45,12 @@ export default function PrivacyPage() {
     const handleDelete = async () => {
         setDeleting(true);
         try {
-            await api.deleteData(userId);
+            const token = await getToken();
+            if (!token) {
+                toast.error('Please sign in');
+                return;
+            }
+            await api.deleteData(token);
             toast.success('All data deleted successfully');
             setShowDeleteModal(false);
 
@@ -55,16 +66,16 @@ export default function PrivacyPage() {
     };
 
     return (
-        <div className="min-h-screen pt-24 bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
+        <div className="min-h-screen pt-24 bg-linear-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold mb-4">
                         Privacy &{' '}
-                        <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        <span className="bg-linear-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                             Data Control
                         </span>
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                    <p className="text-lg text-slate-600 dark:text-slate-300">
                         Your data, your choice. Manage your information with full transparency.
                     </p>
                 </div>
@@ -72,7 +83,7 @@ export default function PrivacyPage() {
                 {/* Privacy Statement */}
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 mb-8">
                     <div className="flex items-start gap-4">
-                        <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1" />
+                        <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400 shrink-0 mt-1" />
                         <div>
                             <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
                                 Your Privacy Matters
@@ -89,19 +100,19 @@ export default function PrivacyPage() {
                 {/* Export Data */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 mb-6">
                     <div className="flex items-start gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
                             <Download className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold mb-2">Export Your Data</h2>
-                            <p className="text-gray-600 dark:text-gray-300 mb-4">
+                            <p className="text-slate-600 dark:text-slate-300 mb-4">
                                 Download all your carbon footprint data, goals, preferences, and activity history
                                 as a JSON file. You can use this data for your own records or import it elsewhere.
                             </p>
                             <button
                                 onClick={handleExport}
                                 disabled={exporting}
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Download className="w-5 h-5" />
                                 {exporting ? 'Exporting...' : 'Export Data'}
@@ -111,7 +122,7 @@ export default function PrivacyPage() {
 
                     <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
                         <div className="flex items-start gap-3">
-                            <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                            <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                             <div className="text-sm text-emerald-800 dark:text-emerald-200">
                                 <div className="font-semibold mb-1">What's included:</div>
                                 <ul className="list-disc list-inside space-y-1">
@@ -128,12 +139,12 @@ export default function PrivacyPage() {
                 {/* Delete Data */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border-2 border-red-200 dark:border-red-900">
                     <div className="flex items-start gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                             <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
                         </div>
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold mb-2">Delete All Data</h2>
-                            <p className="text-gray-600 dark:text-gray-300 mb-4">
+                            <p className="text-slate-600 dark:text-slate-300 mb-4">
                                 Permanently delete all your data from our systems. This action cannot be undone.
                                 We recommend exporting your data first if you want to keep a copy.
                             </p>
@@ -149,7 +160,7 @@ export default function PrivacyPage() {
 
                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
                         <div className="flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
                             <div className="text-sm text-red-800 dark:text-red-200">
                                 <div className="font-semibold mb-1">Warning:</div>
                                 <p>
@@ -165,12 +176,12 @@ export default function PrivacyPage() {
                 {showDeleteModal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-fadeIn">
-                            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+                            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4 shrink-0">
                                 <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
                             </div>
 
                             <h3 className="text-2xl font-bold text-center mb-4">Confirm Deletion</h3>
-                            <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
+                            <p className="text-slate-600 dark:text-slate-300 text-center mb-6">
                                 Are you absolutely sure you want to delete all your data? This action cannot be undone.
                             </p>
 

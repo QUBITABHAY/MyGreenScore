@@ -6,9 +6,10 @@ import { api } from '@/lib/api';
 import type { Item } from '@/lib/types';
 import { formatCO2e } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useAuth } from '@clerk/nextjs';
 
 export default function AssessPage() {
-    const [userId] = useState('demo-user'); // In production, get from auth
+    const { getToken } = useAuth();
     const [items, setItems] = useState<Item[]>([
         { item_name: '', quantity: 1, unit: 'kg' }
     ]);
@@ -43,7 +44,12 @@ export default function AssessPage() {
 
         setLoading(true);
         try {
-            const response = await api.assessFootprint(userId, validItems);
+            const token = await getToken();
+            if (!token) {
+                toast.error('Please sign in to assess footprint');
+                return;
+            }
+            const response = await api.assessFootprint(token, validItems);
             setResults(response);
             toast.success('Assessment completed!');
         } catch (error) {
@@ -60,16 +66,16 @@ export default function AssessPage() {
     };
 
     return (
-        <div className="min-h-screen pt-24 bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
+        <div className="min-h-screen pt-24 bg-linear-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold mb-4">
                         Assess Your{' '}
-                        <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        <span className="bg-linear-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                             Carbon Footprint
                         </span>
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                    <p className="text-lg text-slate-700 dark:text-slate-200">
                         Add items and activities to calculate their environmental impact
                     </p>
                 </div>
@@ -80,7 +86,7 @@ export default function AssessPage() {
                         {items.map((item, index) => (
                             <div key={index} className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
                                 <div className="flex-1">
-                                    <label className="block text-sm font-medium mb-2">Item/Activity</label>
+                                    <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Item/Activity</label>
                                     <input
                                         type="text"
                                         value={item.item_name}
@@ -92,7 +98,7 @@ export default function AssessPage() {
                                 </div>
 
                                 <div className="w-full sm:w-32">
-                                    <label className="block text-sm font-medium mb-2">Quantity</label>
+                                    <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Quantity</label>
                                     <input
                                         type="number"
                                         value={item.quantity}
@@ -105,7 +111,7 @@ export default function AssessPage() {
                                 </div>
 
                                 <div className="w-full sm:w-32">
-                                    <label className="block text-sm font-medium mb-2">Unit</label>
+                                    <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Unit</label>
                                     <select
                                         value={item.unit}
                                         onChange={(e) => updateItem(index, 'unit', e.target.value)}
@@ -138,7 +144,7 @@ export default function AssessPage() {
                             <button
                                 type="button"
                                 onClick={addItem}
-                                className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                                className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                             >
                                 <Plus className="w-5 h-5" />
                                 Add Another Item
@@ -147,7 +153,7 @@ export default function AssessPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Calculator className="w-5 h-5" />
                                 {loading ? 'Calculating...' : 'Calculate Footprint'}
@@ -163,14 +169,14 @@ export default function AssessPage() {
                             <h2 className="text-2xl font-bold">Assessment Results</h2>
                             <button
                                 onClick={resetForm}
-                                className="text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400"
+                                className="text-sm text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
                             >
                                 New Assessment
                             </button>
                         </div>
 
                         {/* Total CO2e */}
-                        <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-6 text-white mb-6">
+                        <div className="bg-linear-to-br from-emerald-500 to-green-600 rounded-xl p-6 text-white mb-6">
                             <div className="text-sm font-medium opacity-90 mb-2">Total Carbon Footprint</div>
                             <div className="text-4xl font-bold">{formatCO2e(results.total_co2e_kg)}</div>
                             <div className="text-sm opacity-90 mt-2">CO2e emissions</div>
@@ -184,7 +190,7 @@ export default function AssessPage() {
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <div className="font-semibold">{result.item_name}</div>
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                            <div className="text-sm text-slate-700 dark:text-slate-300">
                                                 Category: {result.category || 'Unknown'}
                                             </div>
                                         </div>
@@ -198,7 +204,7 @@ export default function AssessPage() {
                                     {result.suggestions && result.suggestions.length > 0 && (
                                         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-600">
                                             <div className="text-sm font-medium mb-2">💡 Suggestions:</div>
-                                            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                                            <ul className="text-sm text-slate-700 dark:text-slate-200 space-y-1">
                                                 {result.suggestions.map((suggestion: string, i: number) => (
                                                     <li key={i} className="flex items-start gap-2">
                                                         <span className="text-emerald-500 mt-0.5">•</span>

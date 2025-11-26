@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlmodel
+asyncpg
+google-generativeai
+requests
+python-dotenv
+pydantic-settings
+greenlet

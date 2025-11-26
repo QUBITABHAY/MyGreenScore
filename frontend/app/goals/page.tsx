@@ -5,9 +5,10 @@ import { Target, TrendingDown, Award, Plus } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatCO2e } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useAuth } from '@clerk/nextjs';
 
 export default function GoalsPage() {
-    const [userId] = useState('demo-user');
+    const { getToken, isLoaded, isSignedIn } = useAuth();
     const [activeGoal, setActiveGoal] = useState<any>(null);
     const [currentEmissions, setCurrentEmissions] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -18,14 +19,19 @@ export default function GoalsPage() {
     });
 
     useEffect(() => {
-        loadGoalData();
-    }, []);
+        if (isLoaded && isSignedIn) {
+            loadGoalData();
+        }
+    }, [isLoaded, isSignedIn]);
 
     const loadGoalData = async () => {
         try {
+            const token = await getToken();
+            if (!token) return;
+
             const [goal, stats] = await Promise.all([
-                api.getActiveGoal(userId),
-                api.getDashboardStats(userId),
+                api.getActiveGoal(token),
+                api.getDashboardStats(token),
             ]);
             setActiveGoal(goal);
             setCurrentEmissions(stats.total_co2e_kg || 0);
@@ -46,8 +52,10 @@ export default function GoalsPage() {
         }
 
         try {
-            await api.setGoal({
-                user_id: userId,
+            const token = await getToken();
+            if (!token) return;
+
+            await api.setGoal(token, {
                 target_co2e: parseFloat(formData.target_co2e),
                 period: formData.period,
             });
@@ -63,10 +71,10 @@ export default function GoalsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-300">Loading goals...</p>
+                    <p className="text-slate-700 dark:text-slate-200">Loading goals...</p>
                 </div>
             </div>
         );
@@ -79,16 +87,16 @@ export default function GoalsPage() {
     const isOnTrack = activeGoal ? currentEmissions <= activeGoal.target_co2e : false;
 
     return (
-        <div className="min-h-screen pt-24 bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
+        <div className="min-h-screen pt-24 bg-linear-to-br from-emerald-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 py-12">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold mb-4">
                         Your{' '}
-                        <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                        <span className="bg-linear-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                             Sustainability Goals
                         </span>
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                    <p className="text-lg text-slate-700 dark:text-slate-200">
                         Set targets and track your progress toward reducing your carbon footprint
                     </p>
                 </div>
@@ -98,12 +106,12 @@ export default function GoalsPage() {
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 mb-8">
                         <div className="flex items-start justify-between mb-6">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                                     <Target className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
                                     <h2 className="text-2xl font-bold">Active Goal</h2>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 capitalize">
                                         {activeGoal.period} Target
                                     </p>
                                 </div>
@@ -119,7 +127,7 @@ export default function GoalsPage() {
                         {/* Progress */}
                         <div className="mb-6">
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium">Progress</span>
+                                <span className="text-sm font-medium text-slate-800 dark:text-slate-100">Progress</span>
                                 <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                     {progress.toFixed(1)}%
                                 </span>
@@ -127,8 +135,8 @@ export default function GoalsPage() {
                             <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
                                 <div
                                     className={`h-full rounded-full transition-all duration-500 ${isOnTrack
-                                        ? 'bg-gradient-to-r from-emerald-500 to-green-600'
-                                        : 'bg-gradient-to-r from-red-500 to-orange-600'
+                                        ? 'bg-linear-to-r from-emerald-500 to-green-600'
+                                        : 'bg-linear-to-r from-red-500 to-orange-600'
                                         }`}
                                     style={{ width: `${progress}%` }}
                                 ></div>
@@ -138,11 +146,11 @@ export default function GoalsPage() {
                         {/* Stats */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Emissions</div>
+                                <div className="text-sm text-slate-700 dark:text-slate-300 mb-1">Current Emissions</div>
                                 <div className="text-2xl font-bold">{formatCO2e(currentEmissions)}</div>
                             </div>
                             <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Target</div>
+                                <div className="text-sm text-slate-700 dark:text-slate-300 mb-1">Target</div>
                                 <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                                     {formatCO2e(activeGoal.target_co2e)}
                                 </div>
@@ -150,7 +158,7 @@ export default function GoalsPage() {
                         </div>
 
                         {/* Status Message */}
-                        <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                        <div className="mt-6 p-4 bg-linear-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
                             {isOnTrack ? (
                                 <div className="flex items-center gap-3">
                                     <Award className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
@@ -188,7 +196,7 @@ export default function GoalsPage() {
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-medium mb-2">
+                                <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">
                                     Target CO2e Emissions (kg)
                                 </label>
                                 <input
@@ -201,13 +209,13 @@ export default function GoalsPage() {
                                     className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                     required
                                 />
-                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                                     Set a realistic target for your carbon emissions
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Time Period</label>
+                                <label className="block text-sm font-medium mb-2 text-slate-800 dark:text-slate-100">Time Period</label>
                                 <select
                                     value={formData.period}
                                     onChange={(e) => setFormData({ ...formData, period: e.target.value })}
@@ -231,7 +239,7 @@ export default function GoalsPage() {
                                 )}
                                 <button
                                     type="submit"
-                                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
                                 >
                                     <Plus className="w-5 h-5" />
                                     {activeGoal ? 'Update Goal' : 'Set Goal'}
@@ -242,7 +250,7 @@ export default function GoalsPage() {
                 )}
 
                 {/* Tips */}
-                <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl p-8 text-white text-center">
+                <div className="bg-linear-to-r from-emerald-600 to-green-600 rounded-2xl p-8 text-white text-center">
                     <h3 className="text-2xl font-bold mb-2">Tips for Success</h3>
                     <div className="grid md:grid-cols-3 gap-6 mt-6">
                         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
