@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: str
     GOOGLE_CSE_ID: str
 
+    CLERK_PEM_PUBLIC_KEY: str
+
     class Config:
         env_file = ".env"
 
