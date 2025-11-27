@@ -48,6 +48,22 @@ export const api = {
         return response.data;
     },
 
+    // User endpoints
+    completeOnboarding: async (token: string): Promise<{ status: string; onboarding_completed: boolean }> => {
+        const response = await apiClient.post('/api/user/complete-onboarding',
+            {}, // Empty body
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        return response.data;
+    },
+
+    getUserProfile: async (token: string): Promise<any> => {
+        const response = await apiClient.get('/api/user/me', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
+    },
+
     // Dashboard endpoints
     getDashboardStats: async (token: string): Promise<DashboardStats> => {
         const response = await apiClient.get('/api/dashboard/stats', {

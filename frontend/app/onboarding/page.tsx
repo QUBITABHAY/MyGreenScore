@@ -102,12 +102,7 @@ export default function OnboardingPage() {
             await api.assessFootprint(token, validItems);
 
             // Mark onboarding as complete
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/user/complete-onboarding`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            await api.completeOnboarding(token);
 
             toast.success('Profile created successfully!');
             router.push('/dashboard');

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { api } from '@/lib/api';
 
 export default function OnboardingCheck({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -19,18 +20,10 @@ export default function OnboardingCheck({ children }: { children: React.ReactNod
                 const token = await getToken();
                 if (!token) return;
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/user/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                const user = await api.getUserProfile(token);
 
-                if (response.ok) {
-                    const user = await response.json();
-
-                    if (!user.onboarding_completed) {
-                        router.push('/onboarding');
-                    }
+                if (!user.onboarding_completed) {
+                    router.push('/onboarding');
                 }
             } catch (error) {
                 console.error('Error checking onboarding status:', error);
