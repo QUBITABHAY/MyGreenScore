@@ -1,51 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  /* Eco-friendly color palette */
-  --color-eco-primary: #10b981;
-  --color-eco-secondary: #059669;
-  --color-eco-accent: #34d399;
-  --color-eco-light: #d1fae5;
-  --color-eco-dark: #064e3b;
+  /* Eco-friendly color palette - White & Green Theme */
+  --color-eco-primary: #10b981; /* Emerald 500 */
+  --color-eco-secondary: #059669; /* Emerald 600 */
+  --color-eco-accent: #34d399; /* Emerald 400 */
+  --color-eco-light: #ecfdf5; /* Emerald 50 */
+  --color-eco-dark: #064e3b; /* Emerald 900 */
 
   /* Gradients */
   --gradient-eco: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --gradient-eco-radial: radial-gradient(circle at top right, #34d399, #10b981, #059669);
   --gradient-subtle: linear-gradient(to bottom, #f0fdf4, #ffffff);
 
-  /* Neutral colors */
+  /* Neutral colors - Light Mode Only */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f9fafb;
-  --color-bg-tertiary: #f3f4f6;
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-tertiary: #9ca3af;
-  --color-border: #e5e7eb;
+  --color-bg-secondary: #f8fafc; /* Slate 50 */
+  --color-bg-tertiary: #f1f5f9; /* Slate 100 */
+  --color-text-primary: #0f172a; /* Slate 900 */
+  --color-text-secondary: #475569; /* Slate 600 */
+  --color-text-tertiary: #94a3b8; /* Slate 400 */
+  --color-border: #e2e8f0; /* Slate 200 */
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  --shadow-eco: 0 10px 30px -5px rgba(16, 185, 129, 0.3);
+  --shadow-eco: 0 10px 30px -5px rgba(16, 185, 129, 0.2);
 
   /* Glass effect */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.18);
-}
-
-.dark {
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-bg-tertiary: #334155;
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #cbd5e1;
-  --color-text-tertiary: #94a3b8;
-  --color-border: #334155;
-
-  --gradient-subtle: linear-gradient(to bottom, #1e293b, #0f172a);
-  --glass-bg: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.5);
 }
 
 * {

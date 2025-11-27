@@ -16,19 +16,35 @@ async def export_data(session: AsyncSession = Depends(get_session), user_id: str
     
     # Footprints
     res = await session.execute(select(FootprintRecord).where(FootprintRecord.user_id == user_id))
-    data["footprints"] = res.scalars().all()
+    footprints = res.scalars().all()
+    data["footprints"] = [
+        {k: v for k, v in r.dict().items() if k not in ["user_id", "classification_confidence"]}
+        for r in footprints
+    ]
     
     # Goals
     res = await session.execute(select(UserGoal).where(UserGoal.user_id == user_id))
-    data["goals"] = res.scalars().all()
+    goals = res.scalars().all()
+    data["goals"] = [
+        {k: v for k, v in r.dict().items() if k not in ["user_id"]}
+        for r in goals
+    ]
     
     # Preferences
     res = await session.execute(select(UserPreference).where(UserPreference.user_id == user_id))
-    data["preferences"] = res.scalars().all()
+    preferences = res.scalars().all()
+    data["preferences"] = [
+        {k: v for k, v in r.dict().items() if k not in ["user_id"]}
+        for r in preferences
+    ]
     
     # Memory Logs
     res = await session.execute(select(MemoryLog).where(MemoryLog.user_id == user_id))
-    data["memory_logs"] = res.scalars().all()
+    memory_logs = res.scalars().all()
+    data["memory_logs"] = [
+        {k: v for k, v in r.dict().items() if k not in ["user_id"]}
+        for r in memory_logs
+    ]
     
     return data
 

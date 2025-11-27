@@ -5,7 +5,16 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True, future=True)
+# Production-optimized database engine configuration
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=False,  # Disable SQL logging for performance
+    future=True,
+    pool_size=20,  # Number of persistent connections
+    max_overflow=10,  # Additional connections when pool is full
+    pool_pre_ping=True,  # Verify connections before using
+    pool_recycle=3600,  # Recycle connections after 1 hour
+)
 
 async def init_db():
     async with engine.begin() as conn:

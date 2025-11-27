@@ -1,61 +1,63 @@
-# MyGreenScore - Environmental Footprint Backend (Capstone)
+# MyGreenScore Backend
 
-A Multi-Agent System to calculate environmental footprints, track goals, and provide personalized sustainability suggestions. Built for the Kaggle Agentic AI Capstone.
+## Local Development
 
-## Key Features (Capstone)
--   **Multi-Agent Architecture**: Classifier, Calculator, Suggestion, and Memory Agents.
--   **Memory & Context**: Long-term user memory (goals, preferences) and session management.
--   **Observability**: Request latency tracking and agent decision logging.
--   **Dashboard & Privacy**: Stats, trends, and full data export/deletion capabilities.
+1. Create virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+```
 
-## Setup
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-1.  **Clone the repository**.
-2.  **Create a virtual environment**:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-3.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    pip install pytest
-    ```
-4.  **Environment Variables**:
-    Copy `.env` template and fill in your keys:
-    ```bash
-    cp .env .env.local
-    # Edit .env.local with OPENAI_API_KEY, GOOGLE_API_KEY, GOOGLE_CSE_ID
-    ```
-    *Note: Ensure you have a running PostgreSQL instance or use Docker.*
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
 
-5.  **Run Database (Docker)**:
-    ```bash
-    docker-compose up -d
-    ```
+4. Run database migrations (first time only):
+```bash
+python -c "from app.core.db import init_db; import asyncio; asyncio.run(init_db())"
+```
 
-## Running the Application
-
-Start the FastAPI server:
+5. Start server:
 ```bash
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`.
-Documentation: `http://localhost:8000/docs`.
+API will be available at `http://localhost:8000`
+Interactive docs at `http://localhost:8000/docs`
 
-## Testing
+## Production Deployment (Render)
 
-Run the automated agent evaluation tests:
-```bash
-pytest tests/test_agents.py
-```
+See [DEPLOYMENT.md](../DEPLOYMENT.md) for detailed instructions.
 
-## Architecture
+## API Endpoints
 
--   **Coordinator Agent**: Orchestrates the flow.
--   **Classifier Agent**: Categorizes input items.
--   **Calculator Agent**: Researches and calculates CO2e.
--   **Suggestion Agent**: Generates personalized tips.
--   **Memory Agent**: Manages long-term user context.
+- `GET /` - Welcome message
+- `GET /health` - Health check
+- `POST /api/assess` - Submit carbon footprint data
+- `GET /api/dashboard/stats` - Get user statistics
+- `GET /api/dashboard/trends` - Get emission trends
+- `GET /api/goals/` - Get user goals
+- `POST /api/goals/` - Create new goal
+- `GET /api/privacy/export` - Export user data
+- `DELETE /api/privacy/data` - Delete all user data
+- `GET /api/quotes/daily` - Get daily sustainability quote
+- `GET /api/user/me` - Get user profile
+- `POST /api/user/complete-onboarding` - Mark onboarding complete
 
+## Environment Variables
+
+Required:
+- `DATABASE_URL` - PostgreSQL connection string
+- `GOOGLE_API_KEY` - Google Gemini API key
+- `CLERK_PEM_PUBLIC_KEY` - Clerk authentication public key
+
+Optional:
+- `GOOGLE_CSE_ID` - Google Custom Search Engine ID
+- `CORS_ORIGINS` - Comma-separated list of allowed origins
