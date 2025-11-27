@@ -6,8 +6,12 @@ from app.core.config import get_settings
 settings = get_settings()
 
 # Production-optimized database engine configuration
+database_url = settings.DATABASE_URL
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    database_url,
     echo=False,  # Disable SQL logging for performance
     future=True,
     pool_size=20,  # Number of persistent connections
